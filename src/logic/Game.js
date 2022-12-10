@@ -1,4 +1,5 @@
 const Config = require('../Config')
+const colors = require('../constants/colors')
 const events = require('../constants/events')
 const values = require('../constants/values')
 const Event = require('../events/Event')
@@ -93,7 +94,18 @@ module.exports = class Game {
         this.currentPlayer = this.#getRandomFromArr(this.players)
 
         // add the first card to the discard pile
-        this.discardedCards.addCard(this.#getDeck().getTopCard(true))
+        // this.discardedCards.addCard(this.#getDeck().getTopCard(true))
+        let deck = this.#getDeck()
+        let validFirstCards = deck.cards.filter(c =>
+            c.color != colors.BLACK &&
+            c.value != values.DRAW_TWO &&
+            c.value != values.REVERSE &&
+            c.value != values.SKIP
+        )
+
+        let card = this.#getRandomFromArr(validFirstCards)
+        this.discardedCards.addCard(card)
+        deck.removeCard(card)
 
         this.state = "PLAYING"
 
@@ -104,6 +116,7 @@ module.exports = class Game {
      * @param {Player} player the player to deal to
      * @param {number} cards amount to draw
      * @param {boolean} silent if true, the draw event will not be fired
+     * @param {boolean} nextSilent if true, the next player event will not be fired
      */
     draw(player, cards = 1, isNext = true, silent = false, nextSilent = false) {
         let deck = this.#getDeck()
@@ -178,6 +191,8 @@ module.exports = class Game {
         if (player.hand.cards.includes(card) &&
             player == this.currentPlayer &&
             card.isValidOn(this.discardedCards.getTopCard(), true)) {
+
+            if (card.wild) card.color = card.wildPickedColor
 
             if (typeof this.config.override.functions.gameLogic == 'function') {
                 // @ts-ignore

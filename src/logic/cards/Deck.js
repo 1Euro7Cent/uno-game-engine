@@ -1,6 +1,9 @@
 const Card = require("./Card")
 const cardCounts = require("../../constants/cardCounts")
 const colors = require("../../constants/colors")
+const Color = require("./Color")
+const Value = require("./Value")
+const values = require("../../constants/values")
 
 module.exports = class Deck {
     constructor() {
@@ -23,10 +26,68 @@ module.exports = class Deck {
     }
 
     /**
+     * 
+     * @param {Color | string} color 
+     * @param {Value | string} value  
+     * @returns {Card | null}
+     */
+    getCard(color, value) {
+        if (typeof color === "string") color = new Color(color)
+        if (typeof value === "string") value = new Value(value)
+
+        let isWild = value.isWild()
+        // console.log(`ISWILD: ${isWild}`)
+
+        let card = this.cards.find(c => {
+
+            // console.log(`C.VALUE: ${c.value} | VALUE: ${value}`)
+            // console.log(`VALUE EXP: ${c.value.value == value}`)
+            // console.log(`EXP: ${isWild || c.color == color}`)
+
+            let retValue = (isWild || c.color.color == color) && c.value.value == value
+            // console.log(`TOTAL EXP: ${retValue}`)
+            return retValue
+        })
+        // console.log(`CARD: ${card}`)
+
+        if (!card) return null
+
+        if (card.wild) {
+            card.wildPickedColor = color
+        }
+
+        return card
+    }
+
+    getColorCounts() {
+        let counts = {}
+        for (let card of this.cards) {
+            if (!counts[card.color]) counts[card.color] = 0
+            counts[card.color]++
+        }
+        return counts
+    }
+
+
+
+
+    /**
      * @param {Card} card
+     * @returns {boolean} true if the card was removed
      */
     removeCard(card) {
-        this.cards = this.cards.filter(c => c !== card)
+        if (this.cards.includes(card)) {
+            this.cards = this.cards.filter(c => c !== card)
+        }
+        else
+            if (this.cards.find(c => c.color == card.color && c.value == card.value)) {
+                this.cards = this.cards.filter(c => c.color != card.color && c.value != card.value)
+            }
+
+            else {
+                return false
+            }
+        return true
     }
 
     /**
