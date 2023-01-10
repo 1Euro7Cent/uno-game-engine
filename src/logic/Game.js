@@ -138,6 +138,9 @@ module.exports = class Game {
 
         if (isNext) this.setNextPlayer(nextSilent)
 
+        if (drawnCards.length == cards) return true
+        return false
+
     }
 
 
@@ -214,10 +217,10 @@ module.exports = class Game {
     /**
      * @returns {Player} 
      */
-    getNextPlayer(rotation = this.rotation) {
-        if (this.currentPlayer == null) return this.#getRandomFromArr(this.players)
+    getNextPlayer(rotation = this.rotation, currentPlayer = this.currentPlayer) {
+        if (currentPlayer == null) return this.#getRandomFromArr(this.players)
 
-        let index = this.players.indexOf(this.currentPlayer)
+        let index = this.players.indexOf(currentPlayer)
         if (rotation == "CW") {
             index++
             if (index >= this.players.length) index = 0

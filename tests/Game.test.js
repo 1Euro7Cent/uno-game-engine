@@ -4,6 +4,8 @@ const Config = require('../src/Config')
 const Card = require('../src/logic/cards/Card')
 const Deck = require('../src/logic/cards/Deck')
 const Player = require('../src/logic/players/Player')
+const colors = require('../src/constants/colors')
+const values = require('../src/constants/values')
 
 test('testing Game is working properly', () => {
     let game = new Game()
@@ -109,6 +111,97 @@ test('testing Game is working properly', () => {
         }
     }
 
+    // play card mechanics
+    let playableCards = game.currentPlayer.getPlayableCards(game.discardedCards.getTopCard(), true)
+    if (playableCards.length > 0) {
+        // console.log("playable cards: " + playableCards.length)
+        // console.log("trying to play: " + playableCards[0])
+        // console.log("top card: " + game.discardedCards.getTopCard())
+        let res = game.play(game.currentPlayer, playableCards[0])
+        expect(res).toBe(true)
+    }
+    else {
+        // player should draw a card
+        let res = game.draw(game.currentPlayer)
+        expect(res).toBe(true)
+    }
 
+    //#gameLogic
+
+    for (let player of game.players) {
+        for (let color of [colors.BLUE, colors.GREEN, colors.RED, colors.YELLOW]) {
+
+            player.hand.addCard(new Card(color, values.REVERSE))
+            player.hand.addCard(new Card(color, values.SKIP))
+            player.hand.addCard(new Card(color, values.DRAW_TWO))
+            player.hand.addCard(new Card(color, values.WILD_DRAW_FOUR))
+
+        }
+    }
+
+    let prevRot = game.rotation
+    let prevPlayer = game.currentPlayer
+    let shouldNextPlayer = game.getNextPlayer(game.rotation == "CCW" ? "CW" : "CCW")
+
+    // reverse
+    game.discardedCards.addCard(new Card(colors.BLUE, values.FIVE))
+    expect(game.play(
+        game.currentPlayer,
+        // @ts-ignore
+        game.currentPlayer.hand.getCard(
+            game.discardedCards.getTopCard().color,
+            values.REVERSE))
+    ).toBe(true)
+    expect(game.rotation).not.toBe(prevRot)
+    expect(game.currentPlayer).not.toBe(prevPlayer)
+    expect(game.currentPlayer).toBe(shouldNextPlayer)
+
+    // skip
+    prevRot = game.rotation
+    prevPlayer = game.currentPlayer
+    shouldNextPlayer = game.getNextPlayer(game.rotation, game.getNextPlayer())
+    game.discardedCards.addCard(new Card(colors.BLUE, values.FIVE))
+    expect(game.play(
+        game.currentPlayer,
+        // @ts-ignore
+        game.currentPlayer.hand.getCard(
+            game.discardedCards.getTopCard().color,
+            values.SKIP))
+    ).toBe(true)
+    expect(game.rotation).toBe(prevRot)
+    expect(game.currentPlayer).not.toBe(prevPlayer)
+    expect(game.currentPlayer).toBe(shouldNextPlayer)
+
+    // draw two
+    prevRot = game.rotation
+    prevPlayer = game.currentPlayer
+    shouldNextPlayer = game.getNextPlayer(game.rotation, game.getNextPlayer())
+    game.discardedCards.addCard(new Card(colors.BLUE, values.FIVE))
+    expect(game.play(
+        game.currentPlayer,
+        // @ts-ignore
+        game.currentPlayer.hand.getCard(
+            game.discardedCards.getTopCard().color,
+            values.DRAW_TWO))
+    ).toBe(true)
+    expect(game.rotation).toBe(prevRot)
+    expect(game.currentPlayer).not.toBe(prevPlayer)
+    expect(game.currentPlayer).toBe(shouldNextPlayer)
+
+    // wild draw four
+    prevRot = game.rotation
+    prevPlayer = game.currentPlayer
+    shouldNextPlayer = game.getNextPlayer(game.rotation, game.getNextPlayer())
+    game.discardedCards.addCard(new Card(colors.BLUE, values.FIVE))
+    expect(game.play(
+        game.currentPlayer,
+        // @ts-ignore
+        game.currentPlayer.hand.getCard(
+            game.discardedCards.getTopCard().color,
+            values.WILD_DRAW_FOUR))
+    ).toBe(true)
+    expect(game.rotation).toBe(prevRot)
+    expect(game.currentPlayer).not.toBe(prevPlayer)
+    expect(game.currentPlayer).toBe(shouldNextPlayer)
 
 })

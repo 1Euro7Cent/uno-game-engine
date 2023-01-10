@@ -22,9 +22,10 @@ module.exports = class Card {
         this.value = value
 
         this.wild = wild || (color.isWild() && value.isWild())
+        // console.log(this.wild)
         /**@type {Color} */
         // @ts-ignore
-        this.wildPickedColor = wild ? new Color(colors.BLACK) : null
+        this.wildPickedColor = this.wild ? new Color(colors.BLACK) : null
     }
 
     /**
@@ -40,8 +41,8 @@ module.exports = class Card {
 
         if ((!toPlay) && this.wild) return true
 
-        if (this.wild && this.wildPickedColor.color != colors.BLACK) return true
-        if (this.wild && this.wildPickedColor.color == colors.BLACK) return false
+        if (this.wild && this.wildPickedColor?.color != colors.BLACK) return true
+        if (this.wild && this.wildPickedColor?.color == colors.BLACK) return false
 
         if (this.color.color == card.color.color) return true
         if (this.value.value == card.value.value) return true

@@ -6,36 +6,27 @@ const Color = require('../src/logic/cards/Color')
 const Value = require('../src/logic/cards/Value')
 
 test('testing if Card is working properly', () => {
-    let card1 = new Card(colors.RED, values.ONE)
-    let card2 = new Card(colors.RED, values.FIVE)
+
+    let card1 = new Card(new Color(colors.RED), new Value(values.ZERO))
+    let card2 = new Card(new Color(colors.RED), new Value(values.ZERO))
 
     expect(card1.isValidOn(card2)).toBe(true)
+    expect(card1.isValidOn(card2, true)).toBe(true)
 
-    card1 = new Card(colors.YELLOW, values.SEVEN)
+    card1 = new Card(new Color(colors.BLACK), new Value(values.WILD))
+    card2 = new Card(new Color(colors.RED), new Value(values.ZERO))
+
+    expect(card1.isValidOn(card2)).toBe(true)
+    expect(card1.isValidOn(card2, true)).toBe(false)
+
+    card1 = new Card(new Color(colors.BLUE), new Value(values.SEVEN))
+    card2 = new Card(new Color(colors.YELLOW), new Value(values.SEVEN))
+
+    expect(card1.isValidOn(card2)).toBe(true)
+    expect(card1.isValidOn(card2, true)).toBe(true)
+
+    card2 = new Card(new Color(colors.YELLOW), new Value(values.EIGHT))
 
     expect(card1.isValidOn(card2)).toBe(false)
-
-    card1 = new Card(colors.BLACK, values.WILD)
-
-    expect(card1.isValidOn(card2)).toBe(true)
-
-    card2 = new Card(colors.BLACK, values.WILD)
-
-    expect(card1.isValidOn(card2)).toBe(true)
-
-    card2 = new Card(colors.BLUE, values.REVERSE)
-
-    expect(card1.isValidOn(card2)).toBe(true)
-
-    card1 = new Card(colors.RED, values.DRAW_TWO)
-
-    expect(card1.isValidOn(card2)).toBe(false)
-
-
-    card1 = new Card(colors.GREEN, values.TWO)
-    card2 = new Card(colors.YELLOW, values.TWO)
-
-    expect(card1.isValidOn(card2)).toBe(true)
-
-    expect(new Card(new Color(colors.BLUE), new Value(values.DRAW_TWO))).toBeInstanceOf(Card)
+    expect(card1.isValidOn(card2, true)).toBe(false)
 })

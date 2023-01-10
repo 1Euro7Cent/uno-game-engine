@@ -8,11 +8,11 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "jest": "^29.1.2"
+    "jest": "^29.3.1"
   },
   "scripts": {
     "test": "jest --coverage",
-    "testw": "jest --watchAll --coverage",
+    "testw": "jest --watchAll --coverage"
   },
   "repository": {
     "type": "git",
