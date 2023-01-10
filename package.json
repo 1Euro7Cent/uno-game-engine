@@ -3,12 +3,32 @@
   "version": "3.1.0",
   "description": "This is a game engine for the card game UNO",
   "main": "index.js",
-  "scripts": {
-    "test": "jest --watchAll --coverage"
+  "directories": {
+    "test": "tests"
   },
-  "author": "1euro7cent",
-  "license": "GPL-3.0",
+  "dependencies": {},
   "devDependencies": {
     "jest": "^29.1.2"
-  }
+  },
+  "scripts": {
+    "test": "jest --coverage",
+    "testw": "jest --watchAll --coverage",
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1Euro7Cent/uno-game-engine.git"
+  },
+  "keywords": [
+    "uno",
+    "game",
+    "game-engine",
+    "card-game",
+    "card"
+  ],
+  "author": "1euro7cent",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/1Euro7Cent/uno-game-engine/issues"
+  },
+  "homepage": "https://github.com/1Euro7Cent/uno-game-engine#readme"
 }
