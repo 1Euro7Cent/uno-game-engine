@@ -9,7 +9,6 @@ const PlayerDrawEvent = require('../events/PlayerDrawEvent')
 const PlayerPlayEvent = require('../events/PlayerPlayEvent')
 
 // overridable classes
-let Card = require('./cards/Card')
 let Deck = require('./cards/Deck')
 let Player = require('./players/Player')
 
@@ -30,8 +29,6 @@ module.exports = class Game {
         let ovrClasses = this.config.override.classes
         // actually overiting the classes
 
-        // @ts-ignore
-        Card = ovrClasses.Card || Card
         // @ts-ignore
         Deck = ovrClasses.Deck || Deck
         // @ts-ignore
@@ -75,6 +72,7 @@ module.exports = class Game {
      */
     start() {
         if (this.playerNames.length < 2) throw new Error("Not enough players")
+        if (this.state != "NOT_STARTED") throw new Error("Game already started")
         // decks
 
         let decks = Math.ceil(this.playerNames.length / this.config.playersPerDeck) // 5 players / 4 players per deck = 2 decks
@@ -85,8 +83,9 @@ module.exports = class Game {
 
         // players
 
-        for (let name of this.playerNames) {
-            let player = new Player(name)
+        for (let i in this.playerNames) {
+            let name = this.playerNames[i]
+            let player = new Player(name, parseInt(i))
             this.draw(player, this.config.initialCards, false, true)
             this.players.push(player)
         }
@@ -97,10 +96,10 @@ module.exports = class Game {
         // this.discardedCards.addCard(this.#getDeck().getTopCard(true))
         let deck = this.#getDeck()
         let validFirstCards = deck.cards.filter(c =>
-            c.color != colors.BLACK &&
-            c.value != values.DRAW_TWO &&
-            c.value != values.REVERSE &&
-            c.value != values.SKIP
+            c.color.color != colors.BLACK &&
+            c.value.value != values.DRAW_TWO &&
+            c.value.value != values.REVERSE &&
+            c.value.value != values.SKIP
         )
 
         let card = this.#getRandomFromArr(validFirstCards)
@@ -146,7 +145,7 @@ module.exports = class Game {
      * this applies all the rules to the game
      * like 4+ cards, skip, reverse, draw 2, draw 4, wild
      * @param {Player} player
-     * @param {Card} card
+     * @param {import("./cards/Card")} card
      * @returns {boolean} if the card was valid and all actions were made
      */
     #gameLogic(player, card) {
@@ -185,7 +184,7 @@ module.exports = class Game {
 
     /**
      * @param {Player} player
-     * @param {Card} card
+     * @param {import("./cards/Card")} card
      */
     play(player, card) {
         if (player.hand.cards.includes(card) &&
@@ -232,6 +231,60 @@ module.exports = class Game {
 
     }
 
+    toJSON() {
+        return {
+            config: this.config.toJSON(),
+            playerNames: this.playerNames,
+            rotation: this.rotation,
+            currentPlayer: this.currentPlayer,
+            state: this.state,
+            discardedCards: this.discardedCards.toJSON(),
+            decks: this.decks.map(d => d.toJSON()),
+            players: this.players.map(p => p.toJSON()),
+        }
+
+    }
+
+
+    /**
+     * @param {Config} config only the override part of this is used
+     */
+    static fromJSON(json, config) {
+        let invalidText = "Invalid JSON: {0}. You can only import a game that was exported or you did something wrong. with manual editing of the JSON."
+        if (!json) throw new Error(invalidText.replace("{0}", "json is missing"))
+        if (!config) throw new Error("config argument is missing")
+        if (typeof json == 'string') json = JSON.parse(json)
+        // turn config class ovveride into a class
+
+        console.log(json)
+        // validation
+
+
+        if (!json.config) throw new Error(invalidText.replace("{0}", "config is missing"))
+        if (!json.playerNames) throw new Error(invalidText.replace("{0}", "playerNames is missing"))
+        if (!json.rotation) throw new Error(invalidText.replace("{0}", "rotation is missing"))
+        if (!json.currentPlayer) throw new Error(invalidText.replace("{0}", "currentPlayer is missing"))
+        if (!json.state) throw new Error(invalidText.replace("{0}", "state is missing"))
+        if (!json.discardedCards) throw new Error(invalidText.replace("{0}", "discardedCards is missing"))
+        if (!json.decks) throw new Error(invalidText.replace("{0}", "decks is missing"))
+        if (!json.players) throw new Error(invalidText.replace("{0}", "players is missing"))
+
+        // insertion
+        config.insertValues(json.config)
+        let game = new Game(json.playerNames, config)
+        game.rotation = json.rotation
+        // game.currentPlayer = Player.fromJSON(json.currentPlayer)
+        game.players = json.players.map(p => Player.fromJSON(p))
+        // @ts-ignore
+        game.currentPlayer = game.getPlayerById(json.currentPlayer.id)
+        game.state = json.state
+        game.discardedCards = Deck.fromJSON(json.discardedCards)
+        game.decks = json.decks.map(d => Deck.fromJSON(d))
+
+        return game
+
+    }
+
     setNextPlayer(silent = false) {
         let currentPlayer = this.currentPlayer
         let nextPlayer = this.getNextPlayer()
@@ -252,6 +305,26 @@ module.exports = class Game {
      */
     addEventListener(event) {
         return this.eventManager.addEvent(event)
+    }
+
+    /**
+     * @param {number} id
+     */
+    getPlayerById(id) {
+        for (let player of this.players) {
+            if (player.id == id) return player
+        }
+        return null
+    }
+
+    /**
+     * @param {string} name
+     */
+    getPlayerByName(name) {
+        for (let player of this.players) {
+            if (player.name == name) return player
+        }
+        return null
     }
 
     /**

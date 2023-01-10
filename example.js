@@ -1,8 +1,20 @@
 
-const { Game, events, constants, Card } = require('./index.js')
+const { Game, events, constants, Card, Player, Config } = require('./index.js')
 const readLine = require('readline')
+const fs = require('fs')
+const { fstat } = require('fs')
+
+class ComputerPlayer extends Player {
+    constructor(name, id) {
+        super(name, id)
+        console.log("Computer player created")
+    }
+}
 
 
+let config = new Config()
+// @ts-ignore
+config.override.classes.Player = ComputerPlayer
 
 const rl = readLine.createInterface({
     input: process.stdin,
@@ -12,7 +24,8 @@ const rl = readLine.createInterface({
 (async () => {
 
     let name = await askUser("What is your name? ")
-    let game = new Game([name, "Computer"])
+    //let game = new Game([name, "Computer"], config) /*
+    let game = Game.fromJSON(JSON.parse(fs.readFileSync("game.json", "utf-8")), config) //*/
 
     game.eventManager.addEvent(new events.PlayerPlayEvent((player, card) => {
         console.log(`${player.name} played ${card}`)
@@ -37,8 +50,8 @@ const rl = readLine.createInterface({
 
                 let playableWilds = playableCards.filter(card => card.wild)
                 let playableNonWilds = playableCards.filter(card => !card.wild)
-                if (playableWilds.length > 0) playableCards = playableWilds
-                else playableCards = playableNonWilds
+                if (playableNonWilds.length > 0) playableCards = playableNonWilds
+                else playableCards = playableWilds
 
                 let playedCard = playableCards[Math.floor(Math.random() * playableCards.length)]
                 if (playedCard.wild) {
@@ -153,9 +166,14 @@ const rl = readLine.createInterface({
 
     }
 
-    game.start()
+    try {
+        game.start()
+    } catch (e) {
+        console.log(e)
+    }
+    fs.writeFileSync("game.json", JSON.stringify(game.toJSON(), null, 4))
 
-    ///*
+    /*
     let player = game.players.find(p => p.name == name)
     for (let i = 0; i < 7; i++) {
         player?.hand.addCard(new Card(constants.colors.BLACK, constants.values.WILD))

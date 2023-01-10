@@ -1,13 +1,13 @@
 {
   "name": "uno-game-engine",
-  "version": "1.0.0",
-  "description": "",
+  "version": "3.1.0",
+  "description": "This is a game engine for the card game UNO",
   "main": "index.js",
   "scripts": {
     "test": "jest --watchAll --coverage"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "1euro7cent",
+  "license": "GPL-3.0",
   "devDependencies": {
     "jest": "^29.1.2"
   }

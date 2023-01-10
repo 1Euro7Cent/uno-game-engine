@@ -20,4 +20,12 @@ module.exports = class Value {
     toString() {
         return this.value
     }
+
+    toJSON() {
+        return this.value
+    }
+
+    static fromJSON(json) {
+        return new Value(json)
+    }
 }

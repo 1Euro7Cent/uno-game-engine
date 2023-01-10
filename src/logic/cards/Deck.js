@@ -127,4 +127,14 @@ module.exports = class Deck {
         this.cards.sort(() => Math.random() - 0.5)
         return this
     }
+
+    toJSON() {
+        return this.cards.map(c => c.toJSON())
+    }
+
+    static fromJSON(json) {
+        let deck = new Deck()
+        deck.cards = json.map(c => Card.fromJSON(c))
+        return deck
+    }
 }

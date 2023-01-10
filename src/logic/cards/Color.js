@@ -20,4 +20,12 @@ module.exports = class Color {
     toString() {
         return this.color
     }
+
+    toJSON() {
+        return this.color
+    }
+
+    static fromJSON(json) {
+        return new Color(json)
+    }
 }

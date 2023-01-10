@@ -12,7 +12,6 @@ module.exports = class Config {
             classes: {
                 Player: undefined,
                 Deck: undefined,
-                Card: undefined,
             },
             functions: {
                 gameLogic: undefined
@@ -20,6 +19,43 @@ module.exports = class Config {
             }
         }
 
+    }
+
+    toJSON() {
+        let ovrClasses = this.override.classes
+        return {
+            initialCards: this.initialCards,
+            playersPerDeck: this.playersPerDeck,
+            defaultRotation: this.defaultRotation
+        }
+    }
+
+    /**
+     * @param {{ 
+     * initialCards: number; 
+     * playersPerDeck: number; 
+     * defaultRotation: "CW" | "CCW"; 
+     * }} json
+     */
+    static fromJSON(json) {
+        let config = new Config()
+        config.insertValues(json)
+        return config
+    }
+
+    insertValues(json) {
+        this.initialCards = json.initialCards
+        this.playersPerDeck = json.playersPerDeck
+        this.defaultRotation = json.defaultRotation
+    }
+
+    /**
+     * 
+     * @param {any} v 
+     * @returns {boolean} true if v is a class. if undefined, returns false
+     */
+    #isClass(v) {
+        return typeof v === 'function' && /^\s*class\s+/.test(v.toString())
     }
 
     /**

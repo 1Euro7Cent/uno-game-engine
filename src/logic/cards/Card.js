@@ -53,22 +53,45 @@ module.exports = class Card {
         return `${this.color} ${this.value}`
     }
 
+    /**
+     * @returns {Color}
+     */
     get color() {
         return this.#colorI
     }
 
     set color(color) {
         if (typeof color === "string") color = new Color(color)
+        // this.wild = color.isWild() && this.value.isWild()
         this.#colorI = color
     }
 
+    /**
+     * @returns {Value}
+     */
     get value() {
         return this.#valueI
     }
 
     set value(value) {
         if (typeof value === "string") value = new Value(value)
+        // this.wild = this.color.isWild() && value.isWild()
         this.#valueI = value
+    }
+
+    toJSON() {
+        return {
+            color: this.color.toJSON(),
+            value: this.value.toJSON(),
+            wild: this.wild,
+            wildPickedColor: this.wildPickedColor?.toJSON()
+        }
+    }
+
+    static fromJSON(json) {
+        let card = new Card(Color.fromJSON(json.color), Value.fromJSON(json.value), json.wild)
+        if (json.wildPickedColor) card.wildPickedColor = Color.fromJSON(json.wildPickedColor)
+        return card
     }
 
 }
