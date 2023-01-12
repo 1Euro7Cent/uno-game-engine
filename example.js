@@ -24,7 +24,7 @@ const rl = readLine.createInterface({
 (async () => {
 
     let name = await askUser("What is your name? ")
-    //let game = new Game([name, "Computer"], config) /*
+    let game = new Game([name, "Computer"], config) /*
     let game = Game.fromJSON(JSON.parse(fs.readFileSync("game.json", "utf-8")), config) //*/
 
     game.eventManager.addEvent(new events.PlayerPlayEvent((player, card) => {
@@ -171,7 +171,7 @@ const rl = readLine.createInterface({
     } catch (e) {
         console.log(e)
     }
-    fs.writeFileSync("game.json", JSON.stringify(game.toJSON(), null, 4))
+    // fs.writeFileSync("game.json", JSON.stringify(game.toJSON(), null, 4))
 
     /*
     let player = game.players.find(p => p.name == name)

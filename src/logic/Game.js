@@ -188,6 +188,7 @@ module.exports = class Game {
     /**
      * @param {Player} player
      * @param {import("./cards/Card")} card
+     * @returns {boolean} success
      */
     play(player, card) {
         if (player.hand.cards.includes(card) &&

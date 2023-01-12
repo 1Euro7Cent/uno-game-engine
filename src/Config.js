@@ -22,7 +22,6 @@ module.exports = class Config {
     }
 
     toJSON() {
-        let ovrClasses = this.override.classes
         return {
             initialCards: this.initialCards,
             playersPerDeck: this.playersPerDeck,

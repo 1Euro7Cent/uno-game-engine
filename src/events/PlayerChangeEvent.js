@@ -13,6 +13,12 @@ module.exports = class PlayerChangeEvent extends BaseEvent {
     }
 
 
+    /**
+     * 
+     * @param {Player} player 
+     * @param {Player} nextPlayer 
+     * @returns 
+     */
     static fire(player, nextPlayer) {
         return new FireEvent(events.PLAYER_CHANGE, player, nextPlayer)
     }

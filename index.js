@@ -6,7 +6,7 @@ const Color = require('./src/logic/cards/Color')
 const Value = require('./src/logic/cards/Value')
 const Player = require('./src/logic/players/Player')
 
-const BaseEvent = require('./src/events/Event')
+const Event = require('./src/events/Event')
 const EventManager = require('./src/events/EventManager')
 const PlayerPlayEvent = require('./src/events/PlayerPlayEvent')
 const PlayerDrawEvent = require('./src/events/PlayerDrawEvent')
@@ -33,7 +33,7 @@ module.exports = {
     },
     events: {
         EventManager,
-        BaseEvent,
+        Event,
         PlayerPlayEvent,
         PlayerDrawEvent,
         PlayerChangeEvent
