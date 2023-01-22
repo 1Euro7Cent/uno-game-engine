@@ -7,6 +7,7 @@ const EventManager = require('../events/EventManager')
 const PlayerChangeEvent = require('../events/PlayerChangeEvent')
 const PlayerDrawEvent = require('../events/PlayerDrawEvent')
 const PlayerPlayEvent = require('../events/PlayerPlayEvent')
+const Card = require('./cards/Card')
 
 // overridable classes
 let Deck = require('./cards/Deck')
@@ -21,6 +22,11 @@ module.exports = class Game {
      * @param {Config} config 
      */
     constructor(playerNames = [], config = new Config()) {
+
+        if (!Array.isArray(playerNames)) throw new Error("PlayerNames must be an array")
+        if (!(config instanceof Config)) throw new Error("Config must be an instance of Config")
+
+
 
         this.config = config
 
@@ -118,6 +124,14 @@ module.exports = class Game {
      * @param {boolean} nextSilent if true, the next player event will not be fired
      */
     draw(player, cards = 1, isNext = true, silent = false, nextSilent = false) {
+        // user input validation
+        if (!player) throw new Error("No player provided")
+        if (!(player instanceof Player)) throw new Error("Player must be an instance of Player")
+
+        if (typeof cards != "number") throw new Error("Cards must be a number")
+        if (cards < 1) throw new Error("Cards must be greater than 0")
+        if (!Number.isInteger(cards)) throw new Error("Cards must be an integer")
+
         let deck = this.#getDeck()
         let drawnCards = []
 
@@ -130,6 +144,7 @@ module.exports = class Game {
             }
             else {
                 deck = this.#getDeck()
+                if (deck.cards.length == 0) break
                 i--
             }
         }
@@ -187,10 +202,18 @@ module.exports = class Game {
 
     /**
      * @param {Player} player
-     * @param {import("./cards/Card")} card
+     * @param {Card} card
      * @returns {boolean} success
      */
     play(player, card) {
+        // user input validation
+        if (!player) throw new Error("No player provided")
+        if (!(player instanceof Player)) throw new Error("Player must be an instance of Player")
+
+        if (!card) throw new Error("No card provided")
+        if (!(card instanceof Card)) throw new Error("Card must be an instance of Card")
+
+
         if (player.hand.cards.includes(card) &&
             player == this.currentPlayer &&
             card.isValidOn(this.discardedCards.getTopCard(), true)) {
@@ -219,6 +242,9 @@ module.exports = class Game {
      * @returns {Player} 
      */
     getNextPlayer(rotation = this.rotation, currentPlayer = this.currentPlayer) {
+        // user input validation
+        if (rotation != "CW" && rotation != "CCW") throw new Error("Invalid rotation. It must be CW or CCW")
+        if (currentPlayer && !(currentPlayer instanceof Player)) throw new Error("CurrentPlayer must be an instance of Player")
         if (currentPlayer == null) return this.#getRandomFromArr(this.players)
 
         let index = this.players.indexOf(currentPlayer)
@@ -256,18 +282,22 @@ module.exports = class Game {
     static fromJSON(json, config) {
         let invalidText = "Invalid JSON: {0}. You can only import a game that was exported or you did something wrong. with manual editing of the JSON."
         if (!json) throw new Error(invalidText.replace("{0}", "json is missing"))
-        if (!config) throw new Error("config argument is missing")
-        if (typeof json == 'string') json = JSON.parse(json)
-        // turn config class ovveride into a class
+        if (!(config instanceof Config)) throw new Error("config is missing")
+        try {
+            if (typeof json == 'string') json = JSON.parse(json)
 
-        console.log(json)
+        }
+        catch (e) {
+            throw new Error(invalidText.replace("{0}", "json is not parsable"))
+        }
+        // turn config class override into a class
         // validation
 
 
-        if (!json.config) throw new Error(invalidText.replace("{0}", "config is missing"))
+        if (!json.config) throw new Error(invalidText.replace("{0}", "config in json is missing"))
         if (!json.playerNames) throw new Error(invalidText.replace("{0}", "playerNames is missing"))
         if (!json.rotation) throw new Error(invalidText.replace("{0}", "rotation is missing"))
-        if (!json.currentPlayer) throw new Error(invalidText.replace("{0}", "currentPlayer is missing"))
+        if (typeof json.currentPlayer == 'undefined') throw new Error(invalidText.replace("{0}", "currentPlayer is missing"))
         if (!json.state) throw new Error(invalidText.replace("{0}", "state is missing"))
         if (!json.discardedCards) throw new Error(invalidText.replace("{0}", "discardedCards is missing"))
         if (!json.decks) throw new Error(invalidText.replace("{0}", "decks is missing"))

@@ -22,7 +22,7 @@ module.exports = class Deck {
         // @ts-ignore
         if (remove) return this.cards.shift()
 
-        return this.cards[this.cards.length - 1]
+        return this.cards[0]
     }
 
     /**
