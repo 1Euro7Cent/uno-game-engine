@@ -16,6 +16,7 @@ const cardCounts = require('./src/constants/cardCounts')
 const colors = require('./src/constants/colors')
 const events = require('./src/constants/events')
 const values = require('./src/constants/values')
+const FireEvent = require('./src/events/FireEvent')
 
 module.exports = {
     Game,
@@ -32,6 +33,7 @@ module.exports = {
         values
     },
     events: {
+        FireEvent,
         EventManager,
         Event,
         PlayerPlayEvent,
