@@ -23,7 +23,7 @@ npm i uno-game-engine
 
 const { Game, events } = require('uno-game-engine')
 
-let game = new Game(["player1", "player2", "player3", "player4"]) 
+let game = new Game(["player1", "player2", "player3", "player4"]) // this also accepts an actual player objects array. but you need to create it yourself
 
 game.eventManager.addEvent(new events.PlayerChangeEvent((oldPlayer, newPlayer) => {
     // do something with it
@@ -45,6 +45,8 @@ game.draw(game.currentPlayer)
 
 // draws five cards for "player3"
 game.draw(game.getPlayerByName("player3"), 5)
+// draw three cards for player with id 2. (default starts at 0 and increments by 1)
+game.draw(game.getPlayerById(2),3)
 ```
 
 ## Configs

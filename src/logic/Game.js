@@ -1,3 +1,4 @@
+const { deprecate } = require('node:util')
 const Config = require('../Config')
 const colors = require('../constants/colors')
 const events = require('../constants/events')
@@ -18,12 +19,25 @@ let Player = require('./players/Player')
 module.exports = class Game {
     /**
      * 
-     * @param {string[]} playerNames 
+     * @param {string[] | Player[]} players 
      * @param {Config} config 
      */
-    constructor(playerNames = [], config = new Config()) {
+    constructor(players = [], config = new Config()) {
 
-        if (!Array.isArray(playerNames)) throw new Error("PlayerNames must be an array")
+        if (!Array.isArray(players)) throw new Error("Players must be an array")
+
+        // type checks for players
+        for (let player of players) {
+            if (typeof player === "string") {
+                continue
+            }
+
+            if (!(player instanceof Player)) {
+                throw new Error("Players must be an array of strings or players")
+            }
+        }
+
+
         if (!(config instanceof Config)) throw new Error("Config must be an instance of Config")
 
 
@@ -33,7 +47,7 @@ module.exports = class Game {
 
 
         let ovrClasses = this.config.override.classes
-        // actually overiting the classes
+        // actually overriding the classes
 
         // @ts-ignore
         Deck = ovrClasses.Deck || Deck
@@ -41,10 +55,7 @@ module.exports = class Game {
         Player = ovrClasses.Player || Player
 
 
-
-
-
-        this.playerNames = playerNames
+        this.initPlayers = players
 
         /** @type {"CW" | "CCW"}*/
         this.rotation = config.defaultRotation
@@ -71,17 +82,36 @@ module.exports = class Game {
 
 
     }
+    /**
+     * @deprecated since version 3.2.0. use {@link Game.players} or {@link Game.initPlayers} instead. note that initPlayers is basically the same that you passed in the constructor
+     * @returns {string[]} the names of the players
+     */
+    get playerNames() {
+        return deprecate(() => {
+            if (this.players.length > 0)
+                return this.players?.map(player => player.name)
+
+            return this.initPlayers.map(player => player instanceof Player ? player.name : player)
+
+        }, "playerNames (Game#playerNames) is deprecated. Use Game#players or Game#initPlayers instead.")()
+    }
+
+    set playerNames(value) {
+        deprecate(() => {
+            this.initPlayers = value
+        }, "playerNames (Game#playerNames) is deprecated. Use Game#players or Game#initPlayers instead.")()
+    }
 
 
     /**
      * this starts the game and initializes all the players and decks
      */
     start() {
-        if (this.playerNames.length < 2) throw new Error("Not enough players")
+        if (this.initPlayers.length < 2) throw new Error("Not enough players")
         if (this.state != "NOT_STARTED") throw new Error("Game already started")
         // decks
 
-        let decks = Math.ceil(this.playerNames.length / this.config.playersPerDeck) // 5 players / 4 players per deck = 2 decks
+        let decks = Math.ceil(this.initPlayers.length / this.config.playersPerDeck) // 5 players / 4 players per deck = 2 decks
 
         for (let i = 0; i < decks; i++) {
             this.decks.push(new Deck().insertDefaultCards())
@@ -89,9 +119,14 @@ module.exports = class Game {
 
         // players
 
-        for (let i in this.playerNames) {
-            let name = this.playerNames[i]
-            let player = new Player(name, parseInt(i))
+        for (let i in this.initPlayers) {
+            let player = this.initPlayers[i]
+
+            if (typeof player === "string") {
+                player = new Player(player, parseInt(i))
+            }
+
+
             this.draw(player, this.config.initialCards, false, true)
             this.players.push(player)
         }
@@ -264,7 +299,10 @@ module.exports = class Game {
     toJSON() {
         return {
             config: this.config.toJSON(),
-            playerNames: this.playerNames,
+            initPlayers: this.initPlayers.map(p => {
+                if (p instanceof Player) return p.toJSON()
+                else return p
+            }),
             rotation: this.rotation,
             currentPlayer: this.currentPlayer,
             state: this.state,
@@ -295,7 +333,7 @@ module.exports = class Game {
 
 
         if (!json.config) throw new Error(invalidText.replace("{0}", "config in json is missing"))
-        if (!json.playerNames) throw new Error(invalidText.replace("{0}", "playerNames is missing"))
+        if (!json.initPlayers) throw new Error(invalidText.replace("{0}", "initPlayers is missing"))
         if (!json.rotation) throw new Error(invalidText.replace("{0}", "rotation is missing"))
         if (typeof json.currentPlayer == 'undefined') throw new Error(invalidText.replace("{0}", "currentPlayer is missing"))
         if (!json.state) throw new Error(invalidText.replace("{0}", "state is missing"))
@@ -305,7 +343,7 @@ module.exports = class Game {
 
         // insertion
         config.insertValues(json.config)
-        let game = new Game(json.playerNames, config)
+        let game = new Game(json.initPlayers, config)
         game.rotation = json.rotation
         // game.currentPlayer = Player.fromJSON(json.currentPlayer)
         game.players = json.players.map(p => Player.fromJSON(p))

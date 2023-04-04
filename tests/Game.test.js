@@ -13,7 +13,10 @@ test('testing Game is working properly', () => {
     expect(game.decks.length).toBe(0)
     expect(game.config).toBeInstanceOf(Config)
 
-    game = new Game(["player1", "player2"], new Config().setInitialCards(5).setPlayersPerDeck(10))
+    game = new Game([
+        new Player("player1", 0),
+        new Player("player2", 1),
+    ], new Config().setInitialCards(5).setPlayersPerDeck(10))
 
     expect(game.players.length).toBe(0)
     expect(game.decks.length).toBe(0)
@@ -27,6 +30,9 @@ test('testing Game is working properly', () => {
     expect(game.players.length).toBe(2)
     expect(game.decks.length).toBe(1)
     expect(game.currentPlayer).toBeInstanceOf(Player)
+    expect(game.getPlayerByName("player1")).toBeInstanceOf(Player)
+    expect(game.getPlayerByName("player1").name).toBe("player1")
+    expect(game.getPlayerByName("asd")).toBe(null)
 
 
     // players inventory (hand)
