@@ -10,11 +10,12 @@ test('Creating and starting game', () => {
 
     let game = new Game()
 
-    expect(() => new Game("asdf")).toThrow("PlayerNames must be an array")
+    expect(() => new Game("asdf")).toThrow("Players must be an array")
+    expect(() => new Game([1, 2, 3, 4])).toThrow("Players must be an array of strings")
     expect(() => new Game([], "asdf")).toThrow("Config must be an instance of Config")
 
     expect(() => game.start()).toThrow("Not enough player")
-    game.playerNames = ["Player 1", "Player 2", "Player 3", "Player 4"]
+    game.initPlayers = ["Player 1", "Player 2", "Player 3", "Player 4"]
 
     game.start()
 
@@ -72,28 +73,28 @@ test('fromJson', () => {
     expect(() => Game.fromJSON("a", config)).toThrow("json is not parsable")
 
     expect(() => Game.fromJSON({}, config)).toThrow("config in json is missing")
-    expect(() => Game.fromJSON({ config: {} }, config)).toThrow(invalidText.replace("{0}", "playerNames is missing"))
+    expect(() => Game.fromJSON({ config: {} }, config)).toThrow(invalidText.replace("{0}", "initPlayers is missing"))
     expect(() => Game.fromJSON({
         config: {},
-        playerNames: []
+        initPlayers: []
     }, config)).toThrow(invalidText.replace("{0}", "rotation is missing"))
 
     expect(() => Game.fromJSON({
         config: {},
-        playerNames: [],
+        initPlayers: [],
         rotation: "CW"
     }, config)).toThrow(invalidText.replace("{0}", "currentPlayer is missing"))
 
     expect(() => Game.fromJSON({
         config: {},
-        playerNames: [],
+        initPlayers: [],
         rotation: "CW",
         currentPlayer: 0
     }, config)).toThrow(invalidText.replace("{0}", "state is missing"))
 
     expect(() => Game.fromJSON({
         config: {},
-        playerNames: [],
+        initPlayers: [],
         rotation: "CW",
         currentPlayer: 0,
         state: "started"
@@ -101,7 +102,7 @@ test('fromJson', () => {
 
     expect(() => Game.fromJSON({
         config: {},
-        playerNames: [],
+        initPlayers: [],
         rotation: "CW",
         currentPlayer: 0,
         state: "started",
@@ -110,7 +111,7 @@ test('fromJson', () => {
 
     expect(() => Game.fromJSON({
         config: {},
-        playerNames: [],
+        initPlayers: [],
         rotation: "CW",
         currentPlayer: 0,
         state: "started",
@@ -120,7 +121,7 @@ test('fromJson', () => {
 
     expect(() => Game.fromJSON({
         config: {},
-        playerNames: [],
+        initPlayers: [],
         rotation: "CW",
         currentPlayer: 0,
         state: "started",

@@ -168,6 +168,7 @@ const rl = readLine.createInterface({
 
     try {
         game.start()
+        console.log(game.playerNames) // since 3.2.0 it should output a deprecated warning
     } catch (e) {
         console.log(e)
     }
