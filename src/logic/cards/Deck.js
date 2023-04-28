@@ -94,7 +94,7 @@ module.exports = class Deck {
      * @param {Card} card
      */
     addCard(card) {
-        this.cards.push(card)
+        this.cards.unshift(card)
     }
 
 
