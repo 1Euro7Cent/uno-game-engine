@@ -132,6 +132,43 @@ test('testing Game is working properly', () => {
         expect(res).toBe(true)
     }
 
+    // draw card mechanics (#getDeck)
+
+    let drawGame = new Game(["player1", "player2"], new Config().setInitialCards(50))
+
+    drawGame.start()
+    expect(drawGame.decks.length).toBe(1)
+    expect(drawGame.currentPlayer.hand.cards.length).toBe(50)
+    expect(drawGame.decks[0].cards.length).toBe(
+        108 // total cards in deck
+        - (2 * 50) // two players each with 50 cards
+        - 1) // discard pile
+
+    // console.log("cur len", drawGame.players)
+
+    // put 10 cards in discard pile from current player
+    for (let i = 0; i < 10; i++) {
+
+        let card = drawGame.currentPlayer.hand.getTopCard(true)
+
+        drawGame.discardedCards.addCard(card)
+    }
+
+    expect(drawGame.currentPlayer.hand.cards.length).toBe(50 - 10)
+    expect(drawGame.discardedCards.cards.length).toBe(11)
+
+    // draw 20 cards from deck
+
+
+    // console.log("cur len", drawGame.currentPlayer.hand.cards.length)
+    expect(drawGame.draw(drawGame.currentPlayer, 20, false, true, true)).toBe(true)
+    // console.log("cur len", drawGame.currentPlayer.hand.cards.length)
+    expect(drawGame.currentPlayer.hand.cards.length).toBe(60)
+    expect(drawGame.decks[0].cards.length).toBe(108 - 10 + 7)
+
+
+
+
     //#gameLogic
 
     for (let player of game.players) {
@@ -210,5 +247,8 @@ test('testing Game is working properly', () => {
     // expect(game.rotation).toBe(prevRot)
     // expect(game.currentPlayer).not.toBe(prevPlayer)
     // expect(game.currentPlayer).toBe(shouldNextPlayer) // todo: re add this
+
+
+
 
 })
