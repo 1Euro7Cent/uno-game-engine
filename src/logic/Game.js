@@ -188,8 +188,7 @@ module.exports = class Game {
 
         if (isNext) this.setNextPlayer(nextSilent)
 
-        if (drawnCards.length == cards) return true
-        return false
+        return drawnCards.length == cards
 
     }
 
@@ -411,7 +410,29 @@ module.exports = class Game {
             }
         }
 
-        //todo: reinsert cards from discard pile
+
+        if (deck.cards.length == 0) {
+            let newDeck = new Deck()
+            let topCard = this.discardedCards.getTopCard(false)
+
+            for (let card of this.discardedCards.cards) {
+                if (card == topCard) continue
+                newDeck.addCard(card)
+                this.discardedCards.removeCard(card)
+            }
+
+            if (newDeck.cards.length == 0) {
+                newDeck.insertDefaultCards()
+            }
+
+            newDeck.shuffle()
+            this.decks.push(newDeck)
+            deck = newDeck
+
+        }
+
+        // remove all empty decks
+        this.decks = this.decks.filter(d => d.cards.length > 0)
 
         return deck
     }
