@@ -8,6 +8,8 @@ module.exports = class Config {
          */
         this.defaultRotation = "CW" // CW or CCW
 
+        this.stackCards = false
+
         this.override = {
             classes: {
                 Player: undefined,
@@ -46,6 +48,7 @@ module.exports = class Config {
         this.initialCards = json.initialCards
         this.playersPerDeck = json.playersPerDeck
         this.defaultRotation = json.defaultRotation
+        this.stackCards = json.stackCards
     }
 
     /**
@@ -55,6 +58,15 @@ module.exports = class Config {
      */
     #isClass(v) {
         return typeof v === 'function' && /^\s*class\s+/.test(v.toString())
+    }
+
+    /**
+     * @param {boolean} stackCards
+     * @returns {Config}
+     */
+    setStackCards(stackCards) {
+        this.stackCards = stackCards
+        return this
     }
 
     /**

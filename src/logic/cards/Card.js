@@ -1,4 +1,5 @@
 const colors = require("../../constants/colors")
+const values = require("../../constants/values")
 const Color = require("./Color")
 const Value = require("./Value")
 
@@ -32,10 +33,20 @@ module.exports = class Card {
      * returns true if this card is playable on the given card (laying it ontop of it)
      * @param {Card} card 
      * @param {boolean} toPlay if true does not accept if the card is a wild and no color is given
+     * @param {boolean} isStacking if true, handle the card if it can be stacked on top of the given card
      * @returns {boolean} is valid
      */
-    isValidOn(card, toPlay = false) {
+    isValidOn(card, toPlay = false, isStacking = false) {
         if (typeof card === "undefined") return false
+
+        if (isStacking) {
+            if (this.value.value == values.DRAW_TWO) return card.value.value == this.value.value
+            if (this.value.value == values.WILD_DRAW_FOUR) return card.value.value == this.value.value
+
+            return false
+        }
+
+
         if (this.wild && card.wild) return false
 
 

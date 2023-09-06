@@ -16,11 +16,12 @@ module.exports = class Player {
     /**
      * @param {Card} card
      * @param {boolean} [toPlay]
+     * @param {boolean} [isStacking]
      */
-    getPlayableCards(card, toPlay) {
+    getPlayableCards(card, toPlay, isStacking = false) {
 
         return this.hand.cards.filter(c => {
-            return c.isValidOn(card, toPlay)
+            return c.isValidOn(card, toPlay, isStacking)
         })
 
     }

@@ -30,6 +30,7 @@ test('Drawing cards', () => {
     // player
     expect(() => game.draw()).toThrow("No player provided")
     expect(() => game.draw("aasdasd")).toThrow("Player must be an instance of Player")
+    expect(game.draw(game.getNextPlayer())).toBeFalsy() // trying to draw where the player given is not the current player
 
     // amount
     expect(() => game.draw(game.players[0], true)).toThrow("Cards must be a number")

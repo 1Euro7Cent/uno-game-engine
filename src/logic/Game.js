@@ -67,6 +67,11 @@ module.exports = class Game {
         /**@type {"NOT_STARTED" | "PLAYING" | "STACK_DRAW" | "CONTEST"} */
         this.state = "NOT_STARTED"
 
+        /**
+         * this shows the amount of cards that should be drawn at the end of the stack draw
+         */
+        this.stackDrawAmount = 0
+
         /**@type {Deck} */
         this.discardedCards = new Deck()
 
@@ -127,7 +132,7 @@ module.exports = class Game {
             }
 
 
-            this.draw(player, this.config.initialCards, false, true)
+            this.draw(player, this.config.initialCards, false, true, true, true)
             this.players.push(player)
         }
 
@@ -157,8 +162,10 @@ module.exports = class Game {
      * @param {number} cards amount to draw
      * @param {boolean} silent if true, the draw event will not be fired
      * @param {boolean} nextSilent if true, the next player event will not be fired
+     * @param {boolean} force if true ignores check if the player is the current player
+     * @returns {boolean} if the draw was successful
      */
-    draw(player, cards = 1, isNext = true, silent = false, nextSilent = false) {
+    draw(player, cards = 1, isNext = true, silent = false, nextSilent = false, force = false) {
         // user input validation
         if (!player) throw new Error("No player provided")
         if (!(player instanceof Player)) throw new Error("Player must be an instance of Player")
@@ -166,9 +173,16 @@ module.exports = class Game {
         if (typeof cards != "number") throw new Error("Cards must be a number")
         if (cards < 1) throw new Error("Cards must be greater than 0")
         if (!Number.isInteger(cards)) throw new Error("Cards must be an integer")
+        if (!force && player != this.currentPlayer) return false
 
         let deck = this.#getDeck()
         let drawnCards = []
+
+        if (this.state == "STACK_DRAW") {
+            cards = this.stackDrawAmount
+            this.stackDrawAmount = 0
+            this.state = "PLAYING"
+        }
 
         for (let i = 0; i < cards; i++) {
             if (deck.cards.length > 0) {
@@ -215,13 +229,63 @@ module.exports = class Game {
 
         // draw 2 
         if (card.value.value == values.DRAW_TWO) {
-            this.draw(this.getNextPlayer(), 2, true, false, true)
+
+            // console.log("draw 2 laid")
+            // console.log(this.config.stackCards, card.value.value == values.DRAW_TWO, this.getNextPlayer().hand.getCard(undefined, values.DRAW_TWO) !== null, this.state)
+            // console.log(this.state)
+            if (this.config.stackCards &&
+                card.value.value == values.DRAW_TWO &&
+                this.getNextPlayer().hand.getCard(undefined, values.DRAW_TWO) !== null
+            ) {
+                this.stackDrawAmount += 2
+                this.state = "STACK_DRAW"
+                // console.log("stacking draw 2", this.state)
+            }
+            else {
+
+                // console.log(this.state, this.stackDrawAmount)
+                if (this.state == "STACK_DRAW") {
+                    this.stackDrawAmount += 2
+                    // console.log(`giving ${this.stackDrawAmount} stacked cards`)
+                    let drawRes = this.draw(this.getNextPlayer(), this.stackDrawAmount, true, false, true, true)
+
+                    this.stackDrawAmount = 0
+                    this.state = "PLAYING"
+                }
+
+                else {
+                    this.draw(this.getNextPlayer(), 2, true, false, true, true)
+                    // console.log("drawing 2")
+                }
+            }
             return true
         }
 
         // draw 4
         if (card.value.value == values.WILD_DRAW_FOUR) {
-            this.draw(this.getNextPlayer(), 4, true, false, true)
+
+            if (this.config.stackCards &&
+                card.value.value == values.WILD_DRAW_FOUR &&
+                this.getNextPlayer().hand.getCard(undefined, values.WILD_DRAW_FOUR) !== null
+            ) {
+                this.stackDrawAmount += 4
+                this.state = "STACK_DRAW"
+            }
+            else {
+
+                if (this.state == "STACK_DRAW") {
+                    this.stackDrawAmount += 4
+                    this.draw(this.getNextPlayer(), this.stackDrawAmount, true, false, true, true)
+                    this.stackDrawAmount = 0
+                    this.state = "PLAYING"
+                }
+                else {
+
+                    this.draw(this.getNextPlayer(), 4, true, false, true, true)
+                }
+            }
+
+
             return true
         }
 
@@ -250,7 +314,7 @@ module.exports = class Game {
 
         if (player.hand.cards.includes(card) &&
             player == this.currentPlayer &&
-            card.isValidOn(this.discardedCards.getTopCard(), true)) {
+            card.isValidOn(this.discardedCards.getTopCard(), true, this.config.stackCards && this.state == "STACK_DRAW")) {
 
             if (card.wild) card.color = card.wildPickedColor
 
