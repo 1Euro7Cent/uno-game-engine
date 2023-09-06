@@ -1,6 +1,6 @@
 {
   "name": "uno-game-engine",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "This is a game engine for the card game UNO",
   "main": "index.js",
   "directories": {

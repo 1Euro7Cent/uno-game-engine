@@ -27,32 +27,35 @@ module.exports = class Deck {
 
     /**
      * 
-     * @param {Color | string} color 
-     * @param {Value | string} value  
+     * @param {Color | string} [color] the color to find. if not provided, ignores color
+     * @param {Value | string} [value] the value to find. if not provided, ignores value
      * @returns {Card | null}
      */
     getCard(color, value) {
+        if (typeof color === "undefined" && typeof value === "undefined") return null
         if (typeof color === "string") color = new Color(color)
         if (typeof value === "string") value = new Value(value)
 
-        let isWild = value.isWild()
+        let isWild = typeof value !== "undefined" ? value.isWild() : false
         // console.log(`ISWILD: ${isWild}`)
 
         let card = this.cards.find(c => {
 
-            // console.log(`C.VALUE: ${c.value} | VALUE: ${value}`)
-            // console.log(`VALUE EXP: ${c.value.value == value}`)
-            // console.log(`EXP: ${isWild || c.color == color}`)
+            // let retValue = (isWild || c.color.color == color) && c.value.value == value
 
-            let retValue = (isWild || c.color.color == color) && c.value.value == value
+            let matchColor = (isWild || c.color.color == color) || typeof color === "undefined"
+            let matchValue = c.value.value == value || typeof value === "undefined"
+
+
             // console.log(`TOTAL EXP: ${retValue}`)
-            return retValue
+            return matchColor && matchValue
         })
         // console.log(`CARD: ${card}`)
 
         if (!card) return null
 
         if (card.wild) {
+            // @ts-ignore
             card.wildPickedColor = color
         }
 
