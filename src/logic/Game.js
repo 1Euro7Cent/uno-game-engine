@@ -218,6 +218,9 @@ module.exports = class Game {
         // reverse 
         if (card.value.value == values.REVERSE) {
             this.flipDirection()
+            if (this.players.length == 2) {
+                this.setNextPlayer(true)
+            }
             return true
         }
 
